@@ -12,6 +12,8 @@
 
 #include <X11/Xlib.h>
 
+#define SLEEP 55
+
 char *tzberlin = "Europe/Berlin";
 
 static Display *dpy;
@@ -89,7 +91,7 @@ main(void)
 		return 1;
 	}
 
-	for (;;sleep(90)) {
+	for (;;sleep(SLEEP)) {
 		tmbln = mktimes("%a %d %b %H:%M %Z %Y", tzberlin);
 
 		status = smprintf("Time: %s",
