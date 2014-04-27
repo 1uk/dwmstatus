@@ -13,3 +13,6 @@ I use [stlarch_font](http://sourceforge.net/projects/stlarchfont/ "sourceforge")
 * reminder
 * battery if low
 * volume
+
+## Icons
+To view or modify the icons convert the font to bdf format `pcf2bdf -o out.bdf in.pcf`, then open with [gbdfed](http://sofia.nmsu.edu/~mleisher/Software/gbdfed/).
