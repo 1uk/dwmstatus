@@ -84,7 +84,8 @@ int
 main(void)
 {
 	char *status;
-	char *tmbln;
+	char *ckbln;
+    char *dtbln;
 
 	if (!(dpy = XOpenDisplay(NULL))) {
 		fprintf(stderr, "dwmstatus: cannot open display.\n");
@@ -92,12 +93,13 @@ main(void)
 	}
 
 	for (;;sleep(SLEEP)) {
-		tmbln = mktimes("%a %d %b %H:%M %Z %Y", tzberlin);
+		ckbln = mktimes("\uE015 %H:%M", tzberlin);
+		dtbln = mktimes("%a %d %b %H:%M %Z %Y", tzberlin);
 
-		status = smprintf("Time: %s",
-				tmbln);
+		status = smprintf("%s",
+				ckbln);
 		setstatus(status);
-		free(tmbln);
+		free(ckbln);
 		free(status);
 	}
 
