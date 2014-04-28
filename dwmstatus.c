@@ -14,6 +14,9 @@
 
 #define SLEEP 55
 
+#define CLOCKSTR "\uE015 %H:%M" /* icon, hour, minute */
+#define DATESTR "%a %d %b"      /* weekday, daynumber, monthnumber (see strftime manpage) */
+
 char *tzberlin = "Europe/Berlin";
 
 static Display *dpy;
@@ -93,11 +96,11 @@ main(void)
 	}
 
 	for (;;sleep(SLEEP)) {
-		ckbln = mktimes("\uE015 %H:%M", tzberlin);
-		dtbln = mktimes("%a %d %b %H:%M %Z %Y", tzberlin);
+		ckbln = mktimes(CLOCKSTR, tzberlin);
+		dtbln = mktimes(DATESTR, tzberlin);
 
-		status = smprintf("%s",
-				ckbln);
+		status = smprintf("%s | %s",
+				dtbln, ckbln);
 		setstatus(status);
 		free(ckbln);
 		free(status);
