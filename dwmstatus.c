@@ -15,41 +15,11 @@
 #define SLEEP 55
 
 #define CLOCKSTR "\uE015 %H:%M" /* icon, hour, minute */
-#define DATESTR "%a %d %b"      /* weekday, daynumber, monthnumber (see strftime manpage) */
+#define DATESTR "%a %d %b| "      /* weekday, daynumber, monthnumber (see strftime manpage) */
 
 char *tzberlin = "Europe/Berlin";
 
 static Display *dpy;
-
-char *
-smprintf(char *fmt, ...)
-{
-	va_list fmtargs;
-	char *ret;
-	int len;
-
-	va_start(fmtargs, fmt);
-	len = vsnprintf(NULL, 0, fmt, fmtargs);
-	va_end(fmtargs);
-
-	ret = malloc(++len);
-	if (ret == NULL) {
-		perror("malloc");
-		exit(1);
-	}
-
-	va_start(fmtargs, fmt);
-	vsnprintf(ret, len, fmt, fmtargs);
-	va_end(fmtargs);
-
-	return ret;
-}
-
-void
-settz(char *tzname)
-{
-	setenv("TZ", tzname, 1);
-}
 
 char *
 mktimes(char *fmt, char *tzname)
@@ -59,7 +29,7 @@ mktimes(char *fmt, char *tzname)
 	struct tm *timtm;
 
 	memset(buf, 0, sizeof(buf));
-	settz(tzname);
+    setenv("TZ", tzname, 1);
 	tim = time(NULL);
 	timtm = localtime(&tim);
 	if (timtm == NULL) {
@@ -87,6 +57,7 @@ int
 main(void)
 {
 	char *status;
+	char *statnext;
 	char *ckbln;
     char *dtbln;
 
@@ -99,7 +70,7 @@ main(void)
 		ckbln = mktimes(CLOCKSTR, tzberlin);
 		dtbln = mktimes(DATESTR, tzberlin);
 
-		status = smprintf("%s | %s",
+		sprintf(*status, "%s %s",
 				dtbln, ckbln);
 		setstatus(status);
 		free(ckbln);
