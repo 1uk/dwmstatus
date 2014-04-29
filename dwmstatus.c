@@ -15,70 +15,52 @@
 #define SLEEP 55
 
 #define CLOCKSTR "\uE015 %H:%M" /* icon, hour, minute */
-#define DATESTR "%a %d %b| "      /* weekday, daynumber, monthnumber (see strftime manpage) */
+#define DATESTR "%a %d %b"      /* weekday, daynumber, monthnumber (see strftime manpage) */
 
-char *tzberlin = "Europe/Berlin";
+  char *tzberlin = "Europe/Berlin";
 
-static Display *dpy;
+  static Display *dpy;
 
-char *
-mktimes(char *fmt, char *tzname)
-{
-	char buf[129];
-	time_t tim;
-	struct tm *timtm;
-
-	memset(buf, 0, sizeof(buf));
-    setenv("TZ", tzname, 1);
-	tim = time(NULL);
-	timtm = localtime(&tim);
-	if (timtm == NULL) {
-		perror("localtime");
-		exit(1);
-	}
-
-	if (!strftime(buf, sizeof(buf)-1, fmt, timtm)) {
-		fprintf(stderr, "strftime == 0\n");
-		exit(1);
-	}
-
-	return smprintf("%s", buf);
-}
-
-void
-setstatus(char *str)
-{
-	XStoreName(dpy, DefaultRootWindow(dpy), str);
-	XSync(dpy, False);
-}
+  void
+  setstatus(char *str)
+  {
+      XStoreName(dpy, DefaultRootWindow(dpy), str);
+      XSync(dpy, False);
+  }
 
 
 int
 main(void)
 {
-	char *status;
-	char *statnext;
-	char *ckbln;
-    char *dtbln;
+    time_t tim;
 
-	if (!(dpy = XOpenDisplay(NULL))) {
-		fprintf(stderr, "dwmstatus: cannot open display.\n");
-		return 1;
-	}
+    char status[100];
+    char buf[100];
 
-	for (;;sleep(SLEEP)) {
-		ckbln = mktimes(CLOCKSTR, tzberlin);
-		dtbln = mktimes(DATESTR, tzberlin);
+    if (!(dpy = XOpenDisplay(NULL))) {
+        fprintf(stderr, "dwmstatus: cannot open display.\n");
+        return 1;
+    }
 
-		sprintf(*status, "%s %s",
-				dtbln, ckbln);
-		setstatus(status);
-		free(ckbln);
-		free(status);
-	}
+    for (;;sleep(SLEEP)) {
 
-	XCloseDisplay(dpy);
+        /* date & time */
+        tim = time(NULL);
+        if (!strftime(buf, sizeof(buf)-1, CLOCKSTR, localtime(&tim))) {
+            fprintf(stderr, "strftime == 0\n");
+            exit(1);
+        }
+        
+        
+        sprintf(status, "%s",
+                buf);
+        setstatus(status);
+        free(buf);
+        free(status);
+    }
 
-	return 0;
+    /* should never execute */
+    XCloseDisplay(dpy);
+
+    return 0;
 }
-
