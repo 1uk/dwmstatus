@@ -14,20 +14,10 @@
 
 #define SLEEP 55
 
-#define CLOCKSTR "\uE015 %H:%M" /* icon, hour, minute */
-#define DATESTR "%a %d %b"      /* weekday, daynumber, monthnumber (see strftime manpage) */
-
-  char *tzberlin = "Europe/Berlin";
+#define DATESTR "%a %d %b \uE015 %H:%M" /* see strftime, and readme#icons */
 
   static Display *dpy;
-
-  void
-  setstatus(char *str)
-  {
-      XStoreName(dpy, DefaultRootWindow(dpy), str);
-      XSync(dpy, False);
-  }
-
+  void setstatus(char *str);
 
 int
 main(void)
@@ -35,7 +25,7 @@ main(void)
     time_t tim;
 
     char status[100];
-    char buf[100];
+    char buf[30];
 
     if (!(dpy = XOpenDisplay(NULL))) {
         fprintf(stderr, "dwmstatus: cannot open display.\n");
@@ -44,19 +34,17 @@ main(void)
 
     for (;;sleep(SLEEP)) {
 
+        /* man strcat */
+        status[0] = '\0';
+
         /* date & time */
         tim = time(NULL);
-        if (!strftime(buf, sizeof(buf)-1, CLOCKSTR, localtime(&tim))) {
+        if (!strftime(buf, sizeof(buf)-1, DATESTR, localtime(&tim))) {
             fprintf(stderr, "strftime == 0\n");
             exit(1);
         }
-        
-        
-        sprintf(status, "%s",
-                buf);
+        strcat(status, buf);
         setstatus(status);
-        free(buf);
-        free(status);
     }
 
     /* should never execute */
@@ -64,3 +52,10 @@ main(void)
 
     return 0;
 }
+
+  void
+  setstatus(char *str)
+  {
+      XStoreName(dpy, DefaultRootWindow(dpy), str);
+      XSync(dpy, False);
+  }
