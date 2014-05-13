@@ -14,7 +14,9 @@
 
 #define SLEEP 55
 
+#define GAP " \uE196 " /* see readme#icons */
 #define DATESTR "%a %d %b \uE015 %H:%M" /* see strftime, and readme#icons */
+#define TASKFILE "/home/luk/.TASK"
 
   static Display *dpy;
   void setstatus(char *str);
@@ -26,6 +28,7 @@ main(void)
 
     char status[100];
     char buf[30];
+	FILE *infile;
 
     if (!(dpy = XOpenDisplay(NULL))) {
         fprintf(stderr, "dwmstatus: cannot open display.\n");
@@ -34,16 +37,25 @@ main(void)
 
     for (;;sleep(SLEEP)) {
 
-        /* man strcat */
+        /* see man strcat */
         status[0] = '\0';
+
+        /* task !reads only till whitespace! */
+		infile = fopen(TASKFILE,"r");
+		fscanf(infile,"%s", buf);fclose(infile);
+        strcat(status, buf);
+        strcat(status, GAP);
+
 
         /* date & time */
         tim = time(NULL);
         if (!strftime(buf, sizeof(buf)-1, DATESTR, localtime(&tim))) {
             fprintf(stderr, "strftime == 0\n");
             exit(1);
-        }
+        }		
         strcat(status, buf);
+
+        /* output */
         setstatus(status);
     }
 
