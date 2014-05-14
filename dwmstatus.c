@@ -13,6 +13,7 @@
 #include <X11/Xlib.h>
 
 #define SLEEP 55
+#define BUF 30
 
 #define GAP " \uE196 " /* see readme#icons */
 #define DATESTR "%a %d %b \uE015 %H:%M" /* see strftime, and readme#icons */
@@ -27,7 +28,7 @@ main(void)
     time_t tim;
 
     char status[100];
-    char buf[30];
+    char buf[BUF];
 	FILE *infile;
 
     if (!(dpy = XOpenDisplay(NULL))) {
@@ -40,9 +41,12 @@ main(void)
         /* see man strcat */
         status[0] = '\0';
 
-        /* task !reads only till whitespace! */
+        /* task - strings only up to BUF */
 		infile = fopen(TASKFILE,"r");
-		fscanf(infile,"%s", buf);fclose(infile);
+        int i;
+        for (i = 0; i <= BUF && (buf[i]=fgetc(infile)) != '\n'; i++);
+        buf[i] = '\0';
+		fclose(infile);
         strcat(status, buf);
         strcat(status, GAP);
 
