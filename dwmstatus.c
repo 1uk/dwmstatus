@@ -13,10 +13,10 @@
 #include <X11/Xlib.h>
 
 #define SLEEP 55
-#define BUF 30
+#define BUFSIZE 30
 
-#define GAP " \uE196 " /* see readme#icons */
-#define DATESTR "%a %d %b \uE015 %H:%M" /* see strftime, and readme#icons */
+#define GAP " \uE196 " /* This is an icon, if you want to change this see README.md. */
+#define DATEFMT "%a %d %b \uE015 %H:%M" /* Format for strftime(). */
 #define TASKFILE "/home/luk/.TASK"
 
   static Display *dpy;
@@ -28,8 +28,8 @@ main(void)
     time_t tim;
 
     char status[100];
-    char buf[BUF];
-	FILE *infile;
+    char buf[BUFSIZE];
+    FILE *infile;
 
     if (!(dpy = XOpenDisplay(NULL))) {
         fprintf(stderr, "dwmstatus: cannot open display.\n");
@@ -38,25 +38,32 @@ main(void)
 
     for (;;sleep(SLEEP)) {
 
-        /* see man strcat */
+        /* initialize empty string */
         status[0] = '\0';
+        buf[0] = '\0';
 
-        /* task - strings only up to BUF */
-		infile = fopen(TASKFILE,"r");
-        int i;
-        for (i = 0; i <= BUF && (buf[i]=fgetc(infile)) != '\n'; i++);
-        buf[i] = '\0';
-		fclose(infile);
-        strcat(status, buf);
-        strcat(status, GAP);
+        /* task - strings only up to BUFSIZE */
+        infile = fopen(TASKFILE,"r");
+        for (int i = 0; i < BUFSIZE; i++) {
+            buf[i] = fgetc(infile);
+            if (buf[i] == '\n' || buf[i] == EOF) {
+                buf[i] = '\0';
+                break;
+            }
+        }
+        fclose(infile);
+        if (buf[0] != '\0') {
+            strcat(status, buf);
+            strcat(status, GAP);
+        }
 
 
         /* date & time */
         tim = time(NULL);
-        if (!strftime(buf, sizeof(buf)-1, DATESTR, localtime(&tim))) {
+        if (!strftime(buf, sizeof(buf)-1, DATEFMT, localtime(&tim))) {
             fprintf(stderr, "strftime == 0\n");
             exit(1);
-        }		
+        }       
         strcat(status, buf);
 
         /* output */
